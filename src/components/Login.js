@@ -40,6 +40,10 @@ const styles = {
   },
   buttonHover: {
     backgroundColor: '#0056b3'
+  },
+  error: {
+    color: 'red',
+    marginBottom: '1rem'
   }
 };
 
@@ -48,9 +52,9 @@ const Login = () => {
     email: '',
     password: ''
   });
+  const [error, setError] = useState(''); // State for error message
 
   const { email, password } = formData;
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -65,12 +69,19 @@ const Login = () => {
 
   const onSubmit = async e => {
     e.preventDefault();
+    setError(''); // Reset the error message before making the request
+
     try {
       const res = await axios.post('/api/auth/login', formData);
       localStorage.setItem('token', res.data.token);
       navigate('/');
     } catch (err) {
-      console.error(err.response ? err.response.data : 'Login failed');
+      console.error('Error response:', err.response); // Log the error response
+      if (err.response && err.response.data) {
+        setError(err.response.data.message || 'Login failed');
+      } else {
+        setError('An unexpected error occurred');
+      }
     }
   };
 
@@ -78,6 +89,7 @@ const Login = () => {
     <div style={styles.container}>
       <form onSubmit={onSubmit} style={styles.form}>
         <h1>Login</h1>
+        {error && <div style={styles.error}>{error}</div>} {/* Display error message */}
         <input
           type="email"
           name="email"
